@@ -1,6 +1,7 @@
 import {fail} from "@sveltejs/kit"
 
 import { uploadKeCloudinary } from "$lib/uploadCloudinary.js";
+import { simpanKeSupabase } from "$lib/simpanKeSupabase.js";
 
 export const actions = {
   default: async ({request}) => {
@@ -41,12 +42,11 @@ export const actions = {
       fileUrl
     }
     
-    console.log(fileUrl)
     console.log(formatData)
     
-    // --- KIRIM KE GOOGLE SHEET ---
-    // const berhasil = await simpanKeSheet(data);
-    // if (!berhasil) return fail(500, { error: "Gagal menyimpan data" });
+    // --- KIRIM KE SUPABASE---
+    const berhasil = await simpanKeSupabase(formatData);
+    if (!berhasil) return fail(500, { error: "Gagal menyimpan data" });
 
     return { sukses: true };
     
