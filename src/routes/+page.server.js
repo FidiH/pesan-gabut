@@ -1,5 +1,7 @@
 import {fail} from "@sveltejs/kit"
 
+import { uploadKeCloudinary } from "$lib/uploadCloudinary.js";
+
 export const actions = {
   default: async ({request}) => {
     
@@ -24,11 +26,11 @@ export const actions = {
     
     // objek data
     
-    // upload cloundary jika ada file
+    // uploadKeCloudinary jika ada file
     let fileUrl = ""
     if(adaFile){
-      fileUrl = await cloundaryApi(file)
-      if(fileUrl) return fail(500, "gagal nyimpen gambar, cek internetmu, jika normal bearti storage gw udah penuh :v")
+      fileUrl = await uploadKeCloudinary(file)
+      if(!fileUrl) return fail(500, "gagal nyimpen gambar, cek internetmu, jika normal bearti storage gw udah penuh :v")
     }
     
     // format data 
@@ -39,13 +41,14 @@ export const actions = {
       fileUrl
     }
     
-    // simpan ke google sheet
-    const googleSheet = await KirimGoogleSheet(formatData)
+    console.log(fileUrl)
+    console.log(formatData)
     
-    // respon jika ggagal
-    if(KirimGoogleSheet) return fail(500, {error: "aduh, eror sih, kayaknya fidi lagi turu deh..."})
+    // --- KIRIM KE GOOGLE SHEET ---
+    // const berhasil = await simpanKeSheet(data);
+    // if (!berhasil) return fail(500, { error: "Gagal menyimpan data" });
+
+    return { sukses: true };
     
-    // jika kode di atas lancar kirim respon
-    return {sukses: true}
   }
 }
