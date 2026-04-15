@@ -22,7 +22,7 @@ export const actions = {
     const adaPesan = pesan && pesan.length > 0
     const adaFile = file && file.size > 0
     if(!adaPesan && !adaFile){
-      return fail(400, {error: "masa iya setor nama doang, lu kira absen apa?"})
+      return fail(400, {pesan: "masa iya setor nama doang, lu kira absen apa?"})
     }
     
     // objek data
@@ -31,7 +31,7 @@ export const actions = {
     let fileUrl = ""
     if(adaFile){
       fileUrl = await uploadKeCloudinary(file)
-      if(!fileUrl) return fail(500, "gagal nyimpen gambar, cek internetmu, jika normal bearti storage gw udah penuh :v")
+      if(!fileUrl) return fail(500, {pesan: "gagal nyimpen gambar, cek internetmu, jika normal bearti storage gw udah penuh :v"})
     }
     
     // format data 
@@ -46,9 +46,12 @@ export const actions = {
     
     // --- KIRIM KE SUPABASE---
     const berhasil = await simpanKeSupabase(formatData);
-    if (!berhasil) return fail(500, { error: "Gagal menyimpan data" });
+    console.log(berhasil)
+    if(!berhasil?.sukses) {
+      return fail(500, {pesan: berhasil?.error?.message+", cek koneksi"})
+    }
 
-    return { sukses: true };
+    return { sukses: true, pesan: "berhasil"};
     
   }
 }

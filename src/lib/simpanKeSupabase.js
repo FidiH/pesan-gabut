@@ -16,10 +16,10 @@ export async function simpanKeSupabase(data) {
 
     if (error) {
       console.log("SUPABASE ERROR:", error.message);
-      return false;
+      return {sukses: false, error};
     }
 
-    return true;
+    return {sukses: true};;
   } catch (e) {
     console.log("ERROR:", e);
     return false;
@@ -34,13 +34,12 @@ export async function getDataPesan() {
       .order("tanggal", { ascending: false });
 
     if (error) {
-      console.log("SUPABASE ERROR:", error.message);
-      return null;
+      return {sukses: false, error};
     }
 
     return data;
+    
   } catch (e) {
-    console.log("ERROR:", e);
-    return null;
+    return {error: `ERROR: ${e}`};
   }
 }
