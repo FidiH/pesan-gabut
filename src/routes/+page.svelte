@@ -1,21 +1,24 @@
 <script>
   import { enhance } from "$app/forms";
   import { onMount } from "svelte";
-  
-  //=== cooldown user ===\\
-  // state waktu
-  const COOLDOWN_MS = 2 * 60 * 1000; // 2 menit
+
+  const COOLDOWN_MS = 2 * 60 * 1000;
   const STORAGE_KEY = "last_submit";
 
   let sisaWaktu = $state(0);
+  let loading = $state(false);
+  let pesan = $state(null); // { tipe: "sukses" | "error", teks: string }
+  let previewUrl = $state(null);
   let interval = null;
-  
-  // mount di client
+
+  let formRef = $state(null);
+  let fileInput = $state(null);
+
   onMount(() => {
     cekCooldown();
     return () => clearInterval(interval);
   });
-  
+
   function cekCooldown() {
     const lastSubmit = localStorage.getItem(STORAGE_KEY);
     if (!lastSubmit) return;
@@ -39,94 +42,100 @@
       }
     }, 1000);
   }
-  
-  //=== logic ketika user submit ==\\
+
+  function handleFileChange(e) {
+    const file = e.target.files?.[0];
+    if (!file) {
+      previewUrl = null;
+      return;
+    }
+    previewUrl = URL.createObjectURL(file);
+  }
+
+  function resetForm() {
+    formRef?.reset();
+    previewUrl = null;
+  }
+
   const submitEnhance = () => {
-    // simpan waktu saat ini
-    localStorage.setItem(STORAGE_KEY, Date.now().toString());
-    sisaWaktu = COOLDOWN_MS / 1000;
-    mulaiTimer();
-  
+    loading = true;
+    pesan = null;
+
     return async ({ result, update }) => {
+      loading = false;
+
       if (result.type === "failure" || result.type === "error") {
-        // cancel cooldown
+        pesan = {
+          tipe: "error",
+          teks: result.data?.error ?? "Terjadi kesalahan, coba lagi.",
+        };
         localStorage.removeItem(STORAGE_KEY);
         sisaWaktu = 0;
         clearInterval(interval);
       }
-  
-      await update();
+
+      if (result.type === "success") {
+        pesan = { tipe: "sukses", teks: "Pesan berhasil dikirim!" };
+        localStorage.setItem(STORAGE_KEY, Date.now().toString());
+        sisaWaktu = COOLDOWN_MS / 1000;
+        mulaiTimer();
+        resetForm();
+      }
+
+      await update({ reset: false });
     };
   };
-  
-  //=== balasan dari server ==\
-  const {form} =$props()
-  $inspect(form)
-  
-  //=== preview img ==\\
-  let previewUrl = $state(null)
-  
-  function tanganiFile(e){
-    const file = e.target.files[0];
-    
-    // Revoke URL lama untuk mencegah memory leak
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-    }
-
-    if (file) {
-      previewUrl = URL.createObjectURL(file);
-    }
-    
-  }
-  
 </script>
 
-<section class="p-7">
-  {#if form?.sukses || form}
-    <p class="text-red-400">{form?.pesan}</p>
+<section>
+  {#if pesan}
+    <p>{pesan.teks}</p>
   {/if}
+
   <form
+    bind:this={formRef}
     action="/"
     method="POST"
     enctype="multipart/form-data"
     use:enhance={submitEnhance}
   >
-    <!--input nama-->
     <div>
-      <input required type="text" name="nama" />
+      <label for="nama">Nama</label>
+      <input id="nama" required type="text" name="nama" disabled={loading || sisaWaktu > 0} />
     </div>
-    
-    <!--input pesan-->
+
     <div>
-      <textarea name="pesan"></textarea>
+      <label for="pesan">Pesan</label>
+      <textarea id="pesan" name="pesan" disabled={loading || sisaWaktu > 0}></textarea>
     </div>
-    
-    <!--input file-->
+
     <div>
-      <input accept=".jpg, .png, .jpeg, .webp" type="file" name="file"  onchange={tanganiFile}/>
+      <label for="file">File Gambar</label>
+      <input
+        id="file"
+        bind:this={fileInput}
+        accept=".jpg, .png, .jpeg, .webp"
+        type="file"
+        name="file"
+        disabled={loading || sisaWaktu > 0}
+        onchange={handleFileChange}
+      />
+      {#if previewUrl}
+        <img src={previewUrl} alt="preview" />
+      {/if}
     </div>
-  
-    <!--preview img-->
-    {#if previewUrl}
+
     <div>
-      <img src={previewUrl} alt="preview">
-    </div>
-    {/if}
-    
-    <div>
-      <button type="submit" disabled={sisaWaktu > 0}>
-        {#if sisaWaktu > 0}
-          Tunggu {sisaWaktu} detik
+      <button type="submit" disabled={loading || sisaWaktu > 0}>
+        {#if loading}
+          Mengirim...
+        {:else if sisaWaktu > 0}
+          <!--Tunggu {sisaWaktu} detik-->
+          uh.....
         {:else}
           Kirim
         {/if}
       </button>
     </div>
-    
   </form>
-  
 </section>
-
-<style>
-</style>
