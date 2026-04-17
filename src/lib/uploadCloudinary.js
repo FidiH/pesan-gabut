@@ -1,5 +1,5 @@
 import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } from "$env/static/private";
-import crypto from "crypto";
+import crypto from "node:crypto";
 
 export async function uploadKeCloudinary(file) {
   try {
