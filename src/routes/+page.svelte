@@ -122,6 +122,7 @@
         id="nama" 
         placeholder="ex: Pidoy_kece"
         required 
+        minlength="5"
         type="text" 
         name="nama" 
         disabled={loading || sisaWaktu > 0} />
@@ -133,6 +134,7 @@
         class="inputStyle h-28"
         id="pesan" 
         name="pesan" 
+        minlength="10"
         placeholder="ex: P, infokan"
         disabled={loading || sisaWaktu > 0}></textarea>
     </div>
