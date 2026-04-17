@@ -46,7 +46,6 @@ export const actions = {
     
     // --- KIRIM KE SUPABASE---
     const berhasil = await simpanKeSupabase(formatData);
-    console.log(berhasil)
     if(!berhasil?.sukses) {
       return fail(500, {pesan: berhasil?.error?.message+", cek koneksi"})
     }
