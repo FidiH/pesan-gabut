@@ -146,7 +146,7 @@
         hidden="true"
         id="file"
         bind:this={fileInput}
-        accept=".jpg, .png, .jpeg, .webp"
+        accept=".jpg, .png, .jpeg"
         type="file"
         name="file"
         disabled={loading || sisaWaktu > 0}
