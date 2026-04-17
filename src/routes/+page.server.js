@@ -2,9 +2,20 @@ import {fail} from "@sveltejs/kit"
 
 import { uploadKeCloudinary } from "$lib/uploadCloudinary.js";
 import { simpanKeSupabase } from "$lib/simpanKeSupabase.js";
+import { ratelimit } from "$lib/ratelimit";
 
 export const actions = {
   default: async ({request}) => {
+    
+    // redist
+    const ip = request.headers.get("x-forwarded-for") ?? "anonymous";
+
+    const { success, reset } = await ratelimit.limit(ip);
+
+    if (!success) {
+      const sisaDetik = Math.ceil((reset - Date.now()) / 1000);
+      return fail(429, { pesan: `Terlalu banyak request. Tunggu ${sisaDetik} detik.` });
+    }
     
     const data = await request.formData()
     
