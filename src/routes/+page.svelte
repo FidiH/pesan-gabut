@@ -3,6 +3,7 @@
   import { onMount } from "svelte";
   
   import BG from "$lib/assets/Bg.mp4";
+  import STIKER1 from "$lib/assets/stiker1.webp";
   
   const COOLDOWN_MS = 2 * 60 * 1000;
   const STORAGE_KEY = "last_submit";
@@ -170,7 +171,7 @@
           Mengirim...
         {:else if sisaWaktu > 0}
           <!--Tunggu {sisaWaktu} detik-->
-          uh.....
+          uh..... <img class="inline" width="50px" src="{STIKER1}" alt="">
         {:else}
           Kirim
         {/if}
